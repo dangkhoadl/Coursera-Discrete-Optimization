@@ -18,7 +18,7 @@ int readInput(ifstream &fileIn) {
 }
 
 // Exact Solution: Dynamic Programming
-const int MAXN = 201;
+const int MAXN = 203;
 pair<ll, bitset<MAXN>> solveDP() {
     // Init DP and item sets
     vector<vector<ll>> dp(n+1, vector<ll>(K+1, -1));
@@ -37,8 +37,7 @@ pair<ll, bitset<MAXN>> solveDP() {
         if(i+1<=n && w+wei[i+1]<=K) {
             if(dp[i+1][w+wei[i+1]] < cur + val[i+1]) {
                 dp[i+1][w+wei[i+1]] = cur + val[i+1];
-                items[i+1][w+wei[i+1]] = items[i][w];
-                items[i+1][w+wei[i+1]].set(i+1, 1);
+                items[i+1][w+wei[i+1]] = items[i][w]; items[i+1][w+wei[i+1]].set(i+1, 1);
             }
         }
 
@@ -65,7 +64,7 @@ pair<ll, bitset<MAXN>> solveDP() {
 
 
 // Bounded Solution: Depth First Branch and Bound
-const int MAXN_ = 10001;
+const int MAXN_ = 10003;
 struct Object {
     int index;
     ll value;
@@ -102,18 +101,20 @@ pair<ll, bitset<MAXN_>> solveDFBB() {
         0, bitset<MAXN_>(0), 0,
         0, 0, accumulate(val.begin()+1, val.end(), 0)});
 
+    // Memorization for ez Pruning
     map<pair<int,ll>, ll> DP;
     DP[{0,0}] = 0;
 
+    // Do Depth First Branch and Bound with timeout
     ll time = 1e7;
     while(!S.empty() && time) {
         State cur = S.top();
         S.pop();
 
+        // Proceed next state. If do both Add and Not Add -> Finish state
         if(cur.proc < 2) S.push({
             cur.id, cur.choice, cur.proc+1,
             cur.value, cur.weight, cur.estimate});
-
 
         // End of a branch
         if(cur.id == n && bestState.value < cur.value) {
@@ -121,41 +122,44 @@ pair<ll, bitset<MAXN_>> solveDFBB() {
             continue;
         }
         
-        // Prune
+        // Prune w/ estimation
         if(cur.estimate < bestState.value) continue;
 
         // Proceed next State
-        int newId;
-        ll newWeight, newValue;
+        int nextID;
+        ll nextWeight, nextValue;
+        bitset<MAXN_> nextChoice;
 
-        // Choose id + 1
-        newId = cur.id + 1;
-        newWeight = cur.weight + objects[cur.id + 1].weight;
-        newValue = cur.value + objects[cur.id + 1].value;
-        if(cur.proc == 0 && newId <= n && newWeight <= K) {
-            auto it = DP.find({newId, newWeight});
-            if(it == DP.end() || it->second < newValue) {
-                DP[{newId, newWeight}] = newValue;
+        // Add id + 1
+        nextID = cur.id + 1;
+        nextWeight = cur.weight + objects[cur.id + 1].weight;
+        nextValue = cur.value + objects[cur.id + 1].value;
+        nextChoice = cur.choice; nextChoice.set(cur.id + 1);
+        if(cur.proc == 0 && nextID <= n && nextWeight <= K) {
+            auto it = DP.find({nextID, nextWeight});
+            if(it == DP.end() || it->second < nextValue) {
+                DP[{nextID, nextWeight}] = nextValue;
                 S.push({
-                    newId, cur.choice.set(newId), 0,
-                    newValue, newWeight, 
-                        calcEstimate(cur.choice.set(newId), newId, objects)});
+                    nextID, nextChoice, 0,
+                    nextValue, nextWeight, 
+                        calcEstimate(nextChoice, nextID, objects)});
                 --time;
             }
         }
 
-        // Not choose id + 1
-        newId = cur.id + 1;
-        newWeight = cur.weight;
-        newValue = cur.value;
-        if(cur.proc == 1 && cur.id+1 <= n) {
-            auto it = DP.find({newId, newWeight});
-            if(it == DP.end() || it->second < newValue) {
-                DP[{newId, newWeight}] = newValue;
+        // Not Add id + 1: Do after branching Add id+1
+        nextID = cur.id + 1;
+        nextWeight = cur.weight;
+        nextValue = cur.value;
+        nextChoice = cur.choice;
+        if(cur.proc == 1 && nextID <= n) {
+            auto it = DP.find({nextID, nextWeight});
+            if(it == DP.end() || it->second < nextValue) {
+                DP[{nextID, nextWeight}] = nextValue;
                 S.push({
-                    newId, cur.choice, 0,
-                    newValue, newWeight, 
-                        calcEstimate(cur.choice, newId, objects)});
+                    nextID, nextChoice, 0,
+                    nextValue, nextWeight,
+                        calcEstimate(nextChoice, nextID, objects)});
                 --time;
             }
         }
