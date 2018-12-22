@@ -12,9 +12,7 @@ int readInput(ifstream &fileIn) {
 
     val.assign(n+1, 0);
     wei.assign(n+1, 0);
-    for(int i=1; i<=n; ++i) {
-        fileIn >> val[i] >> wei[i];
-    }
+    for(int i=1; i<=n; ++i) fileIn >> val[i] >> wei[i];
 
     return 0;
 }
@@ -65,9 +63,15 @@ pair<ll, bitset<MAXN>> solveDP() {
     return {res, itemSet};
 }
 
-// Bounded Solution: Best First Search
+
+// Bounded Solution: Depth First Branch and Bound
 const int MAXN_ = 10001;
-struct state {
+struct Object {
+    int index;
+    ll value;
+    ll weight;
+};
+struct State {
     int id;
     bitset<MAXN_> choice;
     int proc; // 0: not proceed, 1: Choose i+1, 2: Not choose i+1
@@ -76,29 +80,35 @@ struct state {
     ll weight;
     ll estimate;
 };
-ll calcEstimate(const bitset<MAXN_> &c, int id) {
+ll calcEstimate(const bitset<MAXN_> &c, int id, const vector<Object> &objects) {
     ll est=0;
-    for(int i=1; i<=id; ++i) if(c[i] == 1) est += val[i];
-    for(int i=id+1; i<=n; ++i) est += val[i];
+    for(int i=1; i<=id; ++i) if(c[i] == 1) est += objects[i].value;
+    for(int i=id+1; i<=n; ++i) est += objects[i].value;
     return est;
 }
-pair<ll, bitset<MAXN_>> solveBFS() {
-    state bestState;
+pair<ll, bitset<MAXN_>> solveDFBB() {
+    // Greedy preprocess (val/wei decreasing)
+    vector<Object> objects(n+1);
+    for(int i=1; i<=n; ++i) objects[i] = {i, val[i], wei[i]};
+    sort(objects.begin()+1, objects.end(), [](const Object &a, const Object &b){
+        return a.value*b.weight > b.value*a.weight;});
 
-    stack<state> S;
+    // best State
+    State bestState;
+
+    // Stack for Depth First Search
+    stack<State> S;
     S.push({
         0, bitset<MAXN_>(0), 0,
-        0, 0, accumulate(val.begin(), val.end(), 0)});
+        0, 0, accumulate(val.begin()+1, val.end(), 0)});
 
     map<pair<int,ll>, ll> DP;
     DP[{0,0}] = 0;
 
     ll time = 1e7;
     while(!S.empty() && time) {
-        state cur = S.top();
+        State cur = S.top();
         S.pop();
-
-        // pr(cur.id, cur.choice, cur.proc, cur.value, cur.weight, cur.estimate)
 
         if(cur.proc < 2) S.push({
             cur.id, cur.choice, cur.proc+1,
@@ -108,42 +118,53 @@ pair<ll, bitset<MAXN_>> solveBFS() {
         // End of a branch
         if(cur.id == n && bestState.value < cur.value) {
             bestState = cur;
-            // pr(bestState.value, bestState.choice)
             continue;
         }
         
         // Prune
         if(cur.estimate < bestState.value) continue;
 
-        // Proceed next state
-        // Choose i+1
-        if(cur.proc == 0 && cur.id+1 <= n && cur.weight+wei[cur.id+1] <= K) {
-            auto it = DP.find({cur.id + 1, cur.weight + wei[cur.id + 1]});
-            if(it == DP.end() || it->second < cur.value + val[cur.id + 1]) {
-                DP[{cur.id + 1, cur.weight + wei[cur.id + 1]}] = cur.value + val[cur.id + 1];
+        // Proceed next State
+        int newId;
+        ll newWeight, newValue;
+
+        // Choose id + 1
+        newId = cur.id + 1;
+        newWeight = cur.weight + objects[cur.id + 1].weight;
+        newValue = cur.value + objects[cur.id + 1].value;
+        if(cur.proc == 0 && newId <= n && newWeight <= K) {
+            auto it = DP.find({newId, newWeight});
+            if(it == DP.end() || it->second < newValue) {
+                DP[{newId, newWeight}] = newValue;
                 S.push({
-                    cur.id + 1, cur.choice.set(cur.id + 1), 0,
-                    cur.value + val[cur.id + 1], cur.weight + wei[cur.id + 1], 
-                        calcEstimate(cur.choice.set(cur.id + 1), cur.id + 1)});
+                    newId, cur.choice.set(newId), 0,
+                    newValue, newWeight, 
+                        calcEstimate(cur.choice.set(newId), newId, objects)});
                 --time;
             }
         }
 
-        // Not choose i+1
-        else if(cur.proc == 1 && cur.id+1 <= n) {
-            auto it = DP.find({cur.id + 1, cur.weight});
-            if(it == DP.end() || it->second < cur.value) {
-                DP[{cur.id + 1, cur.weight}] = cur.value;
+        // Not choose id + 1
+        newId = cur.id + 1;
+        newWeight = cur.weight;
+        newValue = cur.value;
+        if(cur.proc == 1 && cur.id+1 <= n) {
+            auto it = DP.find({newId, newWeight});
+            if(it == DP.end() || it->second < newValue) {
+                DP[{newId, newWeight}] = newValue;
                 S.push({
-                    cur.id + 1, cur.choice, 0,
-                    cur.value, cur.weight, 
-                        calcEstimate(cur.choice, cur.id + 1)});
+                    newId, cur.choice, 0,
+                    newValue, newWeight, 
+                        calcEstimate(cur.choice, newId, objects)});
                 --time;
             }
         }
     }
 
-    return {bestState.value, bestState.choice};
+    // Rephrase id
+    bitset<MAXN_> choice(0);
+    for(int i=1; i<=n; ++i) if(bestState.choice[i] == 1) choice[objects[i].index] = 1;
+    return {bestState.value, choice};
 }
 
 
@@ -184,7 +205,7 @@ int main(int agrc, char *argv[]) {
         // Bounded Solution
         else {
             // Solve
-            pair<ll, bitset<MAXN_>> results = solveBFS();
+            pair<ll, bitset<MAXN_>> results = solveDFBB();
 
             // Print results
             cout<< results.first << ' ' << 0 << endl;
