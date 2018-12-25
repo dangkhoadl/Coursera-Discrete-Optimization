@@ -1,7 +1,8 @@
 
 
 #include <sys/resource.h>
-#include "CP.h"
+#include "brute.h"
+#include "heuristic.h"
 
 int V, E;
 vector<vector<int>> edges;
@@ -49,9 +50,21 @@ int main(int agrc, char *argv[]) {
         // Reads input data
         readInput(fileIn);
 
-        // Exact Solution - Complete method - For dataset V <= 20
-        CP CPsolution(V, E, edges);
-        CPsolution.solve();
+        // Solve 
+        if(E < 500) {
+            Brute BruteSolution(V, E, edges);
+            BruteSolution.solve();
+        } else if(E < 2000) {
+            Heuristic HeuristicSolution(V, E, edges, 6, 1e7);
+            HeuristicSolution.solve();
+        } else if(E < 2600) {
+            Heuristic HeuristicSolution(V, E, edges, 4, 1e6);
+            HeuristicSolution.solve();
+        }
+        else {
+            Heuristic HeuristicSolution(V, E, edges, 2, 1e6);
+            HeuristicSolution.solve();
+        }
     }
     return 0;
 }

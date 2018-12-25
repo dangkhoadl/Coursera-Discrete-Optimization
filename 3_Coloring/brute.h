@@ -1,12 +1,12 @@
 
 #pragma once
 
-/* Exact Solution - Complete method - Constraints Programming - For dataset V <= 20 */
+/* Exact Solution - Complete method - Constraints Programming - For small dataset */
 
 #include <bits/stdc++.h>
 using namespace std;
 
-class CP {
+class Brute {
 private:
     int V, E;
     vector<vector<int>> edges;
@@ -45,7 +45,7 @@ private:
         return false;
     }
 public:
-    CP(int V, int E, const vector<vector<int>> &edges) : 
+    Brute(int V, int E, const vector<vector<int>> &edges) : 
         V(V), E(E), edges(edges) {}
     void solve() {
         // Find coloring order - Greedy vertex degree
