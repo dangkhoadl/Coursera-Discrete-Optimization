@@ -16,7 +16,7 @@ struct Object {
 struct State {
     int id;
     bitset<MAXN_> choice;
-    int proc; // 0: not proceed, 1: Choose i+1, 2: Not choose i+1
+    int proc; // 0: not proceed, 1: Choose i+1 alr
 
     ll value;
     ll weight;
@@ -27,6 +27,8 @@ class DFBB {
 private:
     ll n, K;
     vector<ll> val, wei;
+
+    int maxTimeout;
 private:
     ll calcEstimate(const bitset<MAXN_> &c, int id, const vector<Object> &objects) {
         ll est=0;
@@ -38,10 +40,8 @@ private:
         return est;
     }
 public:
-    DFBB(ll n, ll K, const vector<ll> &val, const vector<ll> &wei) : val(val), wei(wei){
-        this->n = n;
-        this->K = K;
-    }
+    DFBB(ll n, ll K, const vector<ll> &val, const vector<ll> &wei, int maxTimeout) : 
+        n(n), K(K), val(val), wei(wei), maxTimeout(maxTimeout) {}
     void solve() {
         // Greedy preprocess (val/wei decreasing)
         vector<Object> objects(n+1);
@@ -65,15 +65,16 @@ public:
         DP[{0,0}] = 0;
 
         // Do Depth First Branch and Bound with timeout
-        ll time = 1e7;
-        while(!S.empty() && time) {
+        int timeout = maxTimeout;
+        while(!S.empty() && timeout) {
             State cur = S.top();
             S.pop();
 
-            // Proceed next state. If do both Add and Not Add -> Finish state
-            if(cur.proc < 2) S.push({
-                cur.id, cur.choice, cur.proc+1,
-                cur.value, cur.weight, cur.estimate});
+            //If do Add i+1 -> Do Not add i+1
+            if(cur.proc == 0) 
+                S.push({
+                    cur.id, cur.choice, 1,
+                    cur.value, cur.weight, cur.estimate});
 
             // End of a branch
             if(cur.id == n && bestState.value < cur.value) {
@@ -103,7 +104,7 @@ public:
                         nextID, nextChoice, 0,
                         nextValue, nextWeight, 
                             calcEstimate(nextChoice, nextID, objects)});
-                    --time;
+                    --timeout;
                 }
             }
 
@@ -120,7 +121,7 @@ public:
                         nextID, nextChoice, 0,
                         nextValue, nextWeight,
                             calcEstimate(nextChoice, nextID, objects)});
-                    --time;
+                    --timeout;
                 }
             }
         }
@@ -146,5 +147,3 @@ public:
             cout << 0 << endl;
     }
 };
-
-

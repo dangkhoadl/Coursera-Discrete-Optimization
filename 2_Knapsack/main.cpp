@@ -31,17 +31,18 @@ int main(int agrc, char *argv[]) {
         // Reads input data
         readInput(fileIn);
 
-        // Split solutions
-        const ll constraint = 5e7 + 1;
-
         // Exact Solution
-        if(n*K < constraint) {
+        if(n*K < (ll)5e7) {
             DP DPsolution(n, K, val, wei);
             DPsolution.solve();
         }
         // Bounded Solution
+        else if(n*K < (ll)1e10) {
+            DFBB DFBBsolution(n, K, val, wei, 1e7);
+            DFBBsolution.solve();
+        } 
         else {
-            DFBB DFBBsolution(n, K, val, wei);
+            DFBB DFBBsolution(n, K, val, wei, 1e8);
             DFBBsolution.solve();
         }
     }
