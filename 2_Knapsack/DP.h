@@ -13,11 +13,9 @@ private:
     ll n, K;
     vector<ll> val, wei;
 public:
-    DP(ll n, ll K, const vector<ll> &val, const vector<ll> &wei) : val(val), wei(wei) {
-        this->n = n;
-        this->K = K;
-    }
-    pair<ll, bitset<MAXN>> solve() {
+    DP(ll n, ll K, const vector<ll> &val, const vector<ll> &wei) : 
+        n(n), K(K), val(val), wei(wei) {}
+    void solve() {
         // Init DP and item sets
         vector<vector<ll>> dp(n+1, vector<ll>(K+1, -1));
         vector<vector<bitset<MAXN>>> items(n+1, vector<bitset<MAXN>>(K+1, 0));
