@@ -30,8 +30,11 @@ private:
 private:
     ll calcEstimate(const bitset<MAXN_> &c, int id, const vector<Object> &objects) {
         ll est=0;
-        for(int i=1; i<=id; ++i) if(c[i] == 1) est += objects[i].value;
-        for(int i=id+1; i<=n; ++i) est += objects[i].value;
+        for(int i=1; i<=id; ++i) 
+            if(c[i] == 1) 
+                est += objects[i].value;
+        for(int i=id+1; i<=n; ++i) 
+            est += objects[i].value;
         return est;
     }
 public:
@@ -39,12 +42,14 @@ public:
         this->n = n;
         this->K = K;
     }
-    pair<ll, bitset<MAXN_>> solve() {
+    void solve() {
         // Greedy preprocess (val/wei decreasing)
         vector<Object> objects(n+1);
-        for(int i=1; i<=n; ++i) objects[i] = {i, val[i], wei[i]};
-        sort(objects.begin()+1, objects.end(), [](const Object &a, const Object &b){
-            return a.value*b.weight > b.value*a.weight;});
+        for(int i=1; i<=n; ++i) 
+            objects[i] = {i, val[i], wei[i]};
+        sort(objects.begin()+1, objects.end(), 
+            [](const Object &a, const Object &b) {
+                return a.value*b.weight > b.value*a.weight;});
 
         // best State
         State bestState;
@@ -77,7 +82,8 @@ public:
             }
             
             // Prune w/ estimation
-            if(cur.estimate < bestState.value) continue;
+            if(cur.estimate < bestState.value)
+                continue;
 
             // Proceed next State
             int nextID;
@@ -120,9 +126,24 @@ public:
         }
 
         // Rephrase id
-        bitset<MAXN_> choice(0);
-        for(int i=1; i<=n; ++i) if(bestState.choice[i] == 1) choice[objects[i].index] = 1;
-        return {bestState.value, choice};
+        bitset<MAXN_> itemSet(0);
+        for(int i=1; i<=n; ++i)
+            if(bestState.choice[i] == 1) 
+                itemSet[objects[i].index] = 1;
+        
+        // Print results
+        cout<< bestState.value << ' ' << 0 << endl;
+
+        for(int i=1; i<n; ++i) {
+            if(itemSet[i] == 1) 
+                cout << 1 << ' ';
+            else 
+                cout << 0 << ' ';
+        }
+        if(itemSet[n] == 1) 
+            cout << 1 << endl;
+        else 
+            cout << 0 << endl;
     }
 };
 

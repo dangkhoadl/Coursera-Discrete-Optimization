@@ -26,10 +26,11 @@ public:
         dp[0][0] = 0;
 
         // Optimize
-        for(int i=0; i<=n; ++i) for(int w=0; w<=K; ++w)  {
+        for(int i=0; i<=n; ++i) for(int w=0; w<=K; ++w) {
             ll cur = dp[i][w];
 
-            if(cur == -1) continue;
+            if(cur == -1) 
+                continue;
 
             // Add i+1
             if(i+1<=n && w+wei[i+1]<=K) {
@@ -57,6 +58,19 @@ public:
                 itemSet = items[n][w];
             }
         }
-        return {res, itemSet};
+
+        // Print results
+        cout<< res << ' ' << 1 << endl;
+
+        for(int i=1; i<n; ++i) {
+            if(itemSet[i] == 1)
+                cout << 1 << ' ';
+            else
+                cout << 0 << ' ';
+        }
+        if(itemSet[n] == 1)
+            cout << 1 << endl;
+        else
+            cout << 0 << endl;
     }
 };

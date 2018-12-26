@@ -36,36 +36,13 @@ int main(int agrc, char *argv[]) {
 
         // Exact Solution
         if(n*K < constraint) {
-            // Solve
             DP DPsolution(n, K, val, wei);
-            pair<ll, bitset<MAXN>> results = DPsolution.solve();
-
-            // Print results
-            cout<< results.first << ' ' << 1 << endl;
-
-            for(int i=1; i<n; ++i) {
-                if(results.second[i] == 1) cout << 1 << ' ';
-                else cout << 0 << ' ';
-            }
-            if(results.second[n] == 1) cout << 1 << endl;
-            else cout << 0 << endl;
+            DPsolution.solve();
         }
-
         // Bounded Solution
         else {
-            // Solve
             DFBB DFBBsolution(n, K, val, wei);
-            pair<ll, bitset<MAXN_>> results = DFBBsolution.solve();
-
-            // Print results
-            cout<< results.first << ' ' << 0 << endl;
-
-            for(int i=1; i<n; ++i) {
-                if(results.second[i] == 1) cout << 1 << ' ';
-                else cout << 0 << ' ';
-            }
-            if(results.second[n] == 1) cout << 1 << endl;
-            else cout << 0 << endl;
+            DFBBsolution.solve();
         }
     }
 
