@@ -70,7 +70,7 @@ public:
             State cur = S.top();
             S.pop();
 
-            //If do Add i+1 -> Do Not add i+1
+            //If do "Add i+1" -> Do "Not add i+1"
             if(cur.proc == 0) 
                 S.push({
                     cur.id, cur.choice, 1,

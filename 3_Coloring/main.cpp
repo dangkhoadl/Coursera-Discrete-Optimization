@@ -1,8 +1,8 @@
 
 
 #include <sys/resource.h>
-#include "brute.h"
-#include "heuristic.h"
+#include "Greedy.h"
+#include "CP.h"
 
 int V, E;
 vector<vector<int>> edges;
@@ -52,18 +52,18 @@ int main(int agrc, char *argv[]) {
 
         // Solve 
         if(E < 500) {
-            Brute BruteSolution(V, E, edges);
-            BruteSolution.solve();
+            CP CPSolution(V, E, edges);
+            CPSolution.solve();
         } else if(E < 2000) {
-            Heuristic HeuristicSolution(V, E, edges, 6, 1e7);
-            HeuristicSolution.solve();
+            Greedy GreedySolution(V, E, edges, 10, 1e8);
+            GreedySolution.solve();
         } else if(E < 2600) {
-            Heuristic HeuristicSolution(V, E, edges, 4, 1e6);
-            HeuristicSolution.solve();
+            Greedy GreedySolution(V, E, edges, 6, 1e7);
+            GreedySolution.solve();
         }
         else {
-            Heuristic HeuristicSolution(V, E, edges, 2, 1e6);
-            HeuristicSolution.solve();
+            Greedy GreedySolution(V, E, edges, 4, 1e7);
+            GreedySolution.solve();
         }
     }
     return 0;
