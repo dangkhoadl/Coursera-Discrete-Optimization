@@ -54,15 +54,8 @@ int main(int agrc, char *argv[]) {
         if(E < 500) {
             CP CPSolution(V, E, edges);
             CPSolution.solve();
-        } else if(E < 2000) {
-            Greedy GreedySolution(V, E, edges, 10, 1e8);
-            GreedySolution.solve();
-        } else if(E < 2600) {
-            Greedy GreedySolution(V, E, edges, 6, 1e7);
-            GreedySolution.solve();
-        }
-        else {
-            Greedy GreedySolution(V, E, edges, 4, 1e7);
+        } else {
+            Greedy GreedySolution(V, E, edges);
             GreedySolution.solve();
         }
     }
