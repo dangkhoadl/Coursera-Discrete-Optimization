@@ -21,7 +21,7 @@ private:
     vector<Node> nodes;
 
     unordered_map<bitset<MAXN>,double> dp;
-    unordered_map<bitset<MAXN>,vector<int>> orders;
+    unordered_map<bitset<MAXN>,vector<int>> paths;
 private:
     bool areSame(double a, double b) {
         return fabs(a-b) < numeric_limits<double>::epsilon();
@@ -41,12 +41,12 @@ public:
     void solve() {
         // Init DP and ordered sets
         dp.clear();
-        orders.clear();
+        paths.clear();
         stack<bitset<MAXN>> S;
 
         // Base cases - start at city 0
         dp[bitset<MAXN>(1<<0)] = 0.0;
-        orders[bitset<MAXN>(1<<0)].push_back(0);
+        paths[bitset<MAXN>(1<<0)].push_back(0);
         S.push(bitset<MAXN>(1<<0));
 
         // best state
@@ -59,7 +59,7 @@ public:
             // current state
             bitset<MAXN> x = S.top();
             double cur = dp[x];
-            int lastC = orders[x].back();
+            int lastC = paths[x].back();
             S.pop();
 
             // Prune
@@ -78,7 +78,7 @@ public:
                 if(dist_ < dp[x_] || it == dp.end()) {
                     // Update best state
                     bestVal = dp[x_] = dist_;
-                    bestOrder = orders[x_] = orders[x];
+                    bestOrder = paths[x_] = paths[x];
                 }
             } 
             // travel to unvisited cities
@@ -90,7 +90,7 @@ public:
                     // Check if i not in x and optimization found
                     if(x[i]==0 && (dist_ < dp[x_] || it == dp.end())) {
                         dp[x_] = dist_;
-                        orders[x_] = orders[x]; orders[x_].push_back(i);
+                        paths[x_] = paths[x]; paths[x_].push_back(i);
 
                         S.push(x_);
                     }

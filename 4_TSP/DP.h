@@ -18,7 +18,7 @@ private:
     vector<Node> nodes;
 
     vector<double> dp;
-    vector<vector<int>> orders;
+    vector<vector<int>> paths;
 private:
     bool areSame(double a, double b) {
         return fabs(a-b) < numeric_limits<double>::epsilon();
@@ -38,12 +38,12 @@ public:
     void solve() {
         // Init DP and ordered sets
         dp.assign((1<<N) + 1, inf);
-        orders.assign((1<<N) + 1, vector<int>());
+        paths.assign((1<<N) + 1, vector<int>());
         queue<int> Q;
 
         // Base cases - start at city 0
         dp[1<<0] = 0.0;
-        orders[1<<0].push_back(0);
+        paths[1<<0].push_back(0);
         Q.push(1<<0);
         
         // Optimize
@@ -51,7 +51,7 @@ public:
             // current state
             int x = Q.front();
             double cur = dp[x];
-            int lastC = orders[x].back();
+            int lastC = paths[x].back();
             Q.pop();
 
             // skip 
@@ -68,7 +68,7 @@ public:
                 dist_ = cur + dist(nodes[lastC], nodes[0]);
                 if(dist_ < dp[x_]) {
                     dp[x_] = dist_;
-                    orders[x_] = orders[x];
+                    paths[x_] = paths[x];
                 }
             } 
             // travel to unvisited cities
@@ -79,7 +79,7 @@ public:
                     // Check if i not in x and optimization found
                     if(!(x&(1<<i)) && dist_ < dp[x_]) {
                         dp[x_] = dist_;
-                        orders[x_] = orders[x]; orders[x_].push_back(i);
+                        paths[x_] = paths[x]; paths[x_].push_back(i);
                         Q.push(x_);
                     }
                 }
@@ -88,8 +88,8 @@ public:
 
         // Print results
         cout << dp[1<<N] << ' ' << 1 << endl;
-        for(int i=0; i<orders[1<<N].size()-1; ++i)
-            cout << orders[1<<N][i] << ' ';
-        cout << orders[1<<N][N-1] << endl;
+        for(int i=0; i<paths[1<<N].size()-1; ++i)
+            cout << paths[1<<N][i] << ' ';
+        cout << paths[1<<N][N-1] << endl;
     }
 };
