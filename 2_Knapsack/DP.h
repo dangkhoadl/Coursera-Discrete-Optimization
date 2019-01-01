@@ -6,10 +6,11 @@
 using namespace std;
 
 #define ll long long
-static const int MAXN = 203;
 
 class DP {
 private:
+    static const int MAXN = 203;
+
     ll n, K;
     vector<ll> val, wei;
 public:
