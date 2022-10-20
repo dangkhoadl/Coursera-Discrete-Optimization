@@ -1,8 +1,15 @@
 #pragma once
-
 /*
 Approx Solution: Heuristic search
 */
+
+int rand_int(int a, int b) {
+    random_device r;
+    default_random_engine e1(r());
+    uniform_int_distribution<int> uniform_dist(a, b-1);
+    return uniform_dist(e1);
+}
+
 class Solution_Heuristic {
 private:
     struct Node {

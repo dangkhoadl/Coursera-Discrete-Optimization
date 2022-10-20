@@ -1,4 +1,15 @@
 #pragma once
+#include <bits/stdc++.h>
+using namespace std;
+
+int rand_int(int a, int b) {
+    // Random in range [a, b)
+    random_device r;
+    default_random_engine e1(r());
+    uniform_int_distribution<int> uniform_dist(a, b-1);
+    return uniform_dist(e1);
+}
+
 /*
 Greedy
     Start with a node v
@@ -12,17 +23,33 @@ private:
         int idx;
         double x;
         double y;
-
         double distance;
+
+        Node(): idx(-1), x(-1.0), y(-1.0), distance(-1.0) {}
+        Node(double x, double y): idx(-1), x(x), y(y), distance(-1.0) {}
+        Node(int idx, double x, double y): idx(-1), x(x), y(y), distance(-1.0) {}
     };
 
     // Input params
+    string _test_case;
     int _N, _n_trials;
     const vector<double> &_X, &_Y;
 
     // Main data structures
     vector<Node> _A;
 private:
+    void __write_best(int best_cycle_len, const vector<int> &best_path) {
+        ofstream f_out;
+        f_out.open("submission/out_" + _test_case);
+
+        f_out << best_cycle_len << " 0" << endl;
+        for(int v=0; v<_N; ++v) {
+            f_out << best_path[v];
+            (v == _N-1) ? f_out << endl: f_out << ' ';
+        }
+        f_out.close();
+    }
+
     double __f_distance(const Node &a, const Node &b) {
         return sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) );
     }
@@ -51,9 +78,15 @@ private:
         return {heu_cycle_len, heu_path};
     }
 public:
-    Heuristic_1side(int N, const vector<double> &Xs,const vector<double> &Ys, int n_trials=10): \
-        _N(N), _X(Xs), _Y(Ys), _n_trials(n_trials) { assert(_X.size() == _Y.size()); }
-    pair<double, vector<int>> solve() {
+    Heuristic_1side(
+            int N,
+            const vector<double> &Xs,const vector<double> &Ys,
+            int n_trials, const string &test_case): \
+        _N(N), \
+        _X(Xs), _Y(Ys), \
+        _n_trials(n_trials), _test_case(test_case) \
+        { assert(_X.size() == _Y.size()); }
+    void solve() {
         // Reseed
         srand(time(0) + rand_int(0, 1e9));
 
@@ -62,7 +95,7 @@ public:
         double y_min = DBL_MAX, y_max = DBL_MIN;
         _A.assign(_N, Node());
         for(int v=0; v<_N; ++v) {
-            _A[v] = {v, _X[v], _Y[v], 0.0};
+            _A[v] = {v, _X[v], _Y[v]};
 
             x_min = min(x_min, _X[v]);
             x_max = min(x_max, _X[v]);
@@ -130,7 +163,6 @@ public:
 
         // do heuristic search
         double best_cycle_len = DBL_MAX;
-        vector<int> best_path;
         for(const int &v: starting_Vs) {
             vector<Node> A_tmp(_A);
 
@@ -140,10 +172,8 @@ public:
             // Relax best ans
             if(best_cycle_len > heu_cycle_len) {
                 best_cycle_len = heu_cycle_len;
-                best_path = heu_path;
+                __write_best(best_cycle_len, heu_path);
             }
         }
-
-        return {best_cycle_len, best_path};
     }
 };

@@ -18,51 +18,48 @@ bool rand_prob(double prob) {
 }
 
 #include "DP.h"
-#include "Hill_Climbing.h"
-#include "Simulated_Annealing.h"
 
-// num of noders, num of edges
-int N;
+
+vector<string> split(const string &str, char delim) {
+    vector<string> result;
+    stringstream str_st(str);
+    for (string x(""); getline(str_st, x, (delim));) {
+        result.emplace_back(x);
+    }
+    return move(result);
+}
+
+string test_case = "";
+int N; // num of nodes
 vector<double> Xs, Ys;
-void read_input() {
-    cin >> N;
+void read_input(const string &input_fpath) {
+    auto parts = split(input_fpath, '/');
+    test_case = parts.back();
+
+    ifstream f_in(input_fpath);
+    f_in >> N;
     Xs.assign(N, 0.0);
     Ys.assign(N, 0.0);
 
     for(int i=0; i<N; ++i) {
-        cin >> Xs[i] >> Ys[i];
+        f_in >> Xs[i] >> Ys[i];
     }
+    f_in.close();
 }
 
 void solve() {
-    // Exact solution
     if(N <= 17) {
         shared_ptr<Solution_DP> dp_solver(new Solution_DP(
             N, Xs, Ys));
         dp_solver->solve();
         dp_solver.reset();
-    }
-    else if(N <= 1000) {
-        shared_ptr<Hill_Climbing> lc_search(new Hill_Climbing(
-            N, Xs, Ys, N*N));
-        lc_search->solve(N*N, N*N);
-        lc_search.reset();
-    }
-    else if(N <= 2000) {
-        shared_ptr<Hill_Climbing> lc_search(new Hill_Climbing(
-            N, Xs, Ys, 11*N));
-        lc_search->solve(9*N, 9*N);
-        lc_search.reset();
     } else {
-        shared_ptr<Hill_Climbing> lc_search(new Hill_Climbing(
-            N, Xs, Ys, 20));
-        lc_search->solve(20, 20);
-        lc_search.reset();
+
     }
 }
 
 
-int32_t main() {
+int32_t main(int agrc, char *argv[]) {
     // This code is here to increase the stack size to avoid stack overflow
     //      in depth-first search.
     const rlim_t kStackSize = 64L * 1024L * 1024L;  // min stack size = 64 Mb
@@ -79,11 +76,16 @@ int32_t main() {
         }
     }
 
+    if(agrc != 2) {
+        cerr << "Format: ./main.exe data/<test-case-fpath>" << endl;
+        return 1;
+    }
+
     // Read stdin
-    read_input();
+    string input_fpath(argv[1]);
+    read_input(input_fpath);
 
     // Solve
-    cout << fixed << setprecision(3);
     solve();
 
     return 0;

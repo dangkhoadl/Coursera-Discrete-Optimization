@@ -1,9 +1,8 @@
 #pragma once
 /*
 */
-#include "Heuristics/Heuristic_1side.h"
-#include "Heuristics/Heuristic_2side.h"
-#include "DEBUG.h"
+#include <bits/stdc++.h>
+using namespace std;
 
 class Simulated_Annealing {
 private:
@@ -13,12 +12,26 @@ struct Node {
     };
 
     // Input params
+    const string &_test_case;
     int _N, _n_trials;
     const vector<double> &_X, &_Y;
 
     // Main data structures
     vector<Node> _A;
 private:
+    void __write_best(int best_cycle_len, const vector<int> &best_path) {
+        ofstream f_out;
+        f_out.open("submission/out_" + _test_case);
+
+        f_out << best_cycle_len << " 0" << endl;
+        for(int v=0; v<_N; ++v) {
+            f_out << best_path[v];
+            (v == _N-1) ? f_out << endl: f_out << ' ';
+        }
+        f_out.close();
+    }
+
+
     double __f_distance(const Node &a, const Node &b) {
         return sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) );
     }
@@ -34,8 +47,7 @@ private:
     vector<int> __swap_edge(int src_1, int src_2,const vector<int> &path) {
         assert(src_1 != src_2);
         vector<int> res;
-        // pr(src_1, src_2);
-        // pri(path);
+
         if(src_1 < src_2) {
             int len = src_2 - src_1;
             res.insert(res.end(), path.begin() + src_1 + 1, path.end());
@@ -50,8 +62,10 @@ private:
         return res;
     }
 public:
-    Simulated_Annealing(int N, const vector<double> &Xs,const vector<double> &Ys, int n_trials=10): \
-        _N(N), _X(Xs), _Y(Ys), _n_trials(n_trials) { assert(_X.size() == _Y.size()); }
+    Simulated_Annealing(int N,
+            const vector<double> &Xs,const vector<double> &Ys,
+            int n_trials, const string &test_case): \
+        _N(N), _X(Xs), _Y(Ys), _n_trials(n_trials), _test_case(test_case) { assert(_X.size() == _Y.size()); }
     void solve(int n_trials_1, int n_trials_2) {
         // Reseed
         srand(time(0) + rand_int(0, 1e9));
@@ -62,26 +76,8 @@ public:
             _A[v] = {_X[v], _Y[v]};
         }
 
-        /// Init Sol
-        // Solve Heuristic 1 side
-        shared_ptr<Heuristic_1side> heu_1(new Heuristic_1side(
-            _N, _X, _Y, n_trials_1));
-        auto [cycle_len_1, path_1] = heu_1->solve();
-        heu_1.reset();
+        /// Check Init Sol
 
-        // Sovle Heuristic 2 sides
-        shared_ptr<Heuristic_2side> heu_2(new Heuristic_2side(
-            _N, _X, _Y, n_trials_2));
-        auto [cycle_len_2, path_2] = heu_2->solve();
-        heu_2.reset();
-
-        // Choose the best solution
-        double best_cycle_len = cycle_len_1;
-        vector<int> best_path = path_1;
-        if(cycle_len_2 < cycle_len_1) {
-            best_cycle_len = cycle_len_2;
-            best_path = path_2;
-        }
 
         // Simulated Annealing
         double T = 1.0*_N*_N;
@@ -125,13 +121,6 @@ public:
                 best_cycle_len = cur_cycle_len;
                 best_path = cur_path;
             }
-        }
-
-        // Print ans
-        cout << best_cycle_len << " 0" << endl;
-        for(int v=0; v<_N; ++v) {
-            cout << best_path[v];
-            (v == _N-1) ? cout << endl: cout << ' ';
         }
     }
 };

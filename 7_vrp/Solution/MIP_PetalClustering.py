@@ -182,14 +182,14 @@ class MIP_PetalClustering(object):
                 split_pt = j
         self._customers = self._customers[split_pt:] + self._customers[:split_pt]
 
-        # Create Grid search
+        # Create grid search for each petal
         #       Prior: petal size dec, num_vehicle dec
         from itertools import product
-        MAX_PETAL_SIZE_GRID = min(60, self._N - 1)
+        MAX_PETAL_SIZE_GRID = min(51, self._N - 1)
         MAX_VEHICLE_SIZE_GRID = min(5, self._V)
 
         params = [(max_petal_size, max_vehicle_size) for max_petal_size, max_vehicle_size in \
-            product(range(MAX_PETAL_SIZE_GRID-20, MAX_PETAL_SIZE_GRID+1, 5), range(2, MAX_VEHICLE_SIZE_GRID+1))]
+            product(range(MAX_PETAL_SIZE_GRID, MAX_PETAL_SIZE_GRID+1, 5), range(2, MAX_VEHICLE_SIZE_GRID+1))]
         params.sort(key=lambda p: p[1], reverse=True)
         params.sort(key=lambda p: p[0], reverse=True)
 
@@ -201,7 +201,7 @@ class MIP_PetalClustering(object):
             accept = True
             vehicle_used = 0
 
-            # Solve each petal Greedily: increase v num, dec petal size
+            # Solve each petal
             while st_ < self._N - 1:
                 customers = [self.Customer(0, 0, self._warehouse.x, self._warehouse.y, 0.0)] + self._customers[st_:en_]
                 V = min(num_vehicles, self._V - len(routes))
@@ -214,7 +214,7 @@ class MIP_PetalClustering(object):
                 if petal_cost_ == -1:
                     logger.info(f"{self._test_case} : petal = [{st_}, {en_}) : num vehicles = {V} : vehicles used = {vehicle_used}/{self._V} : failed")
 
-                    # If failed increase num_vehicles then decrease petal size
+                    # If failed increae num_vehicles then decrease petal size
                     if num_vehicles == MAX_VEHICLE_SIZE:
                         en_ -= 1
                         num_vehicles = 1
