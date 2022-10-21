@@ -1,8 +1,10 @@
 #include <bits/stdc++.h>
 #include <sys/resource.h>
+#include <omp.h>
+#include <unistd.h>
 using namespace std;
-#define int long long
 
+#define int long long
 #include "Backtrack.h"
 #include "Heuristic.h"
 

@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
 #include <sys/resource.h>
+#include <omp.h>
+#include <unistd.h>
 using namespace std;
 
 #define int long long
@@ -18,7 +20,7 @@ bool rand_prob(double prob) {
 }
 
 #include "DP.h"
-
+#include "Stacker.h"
 
 vector<string> split(const string &str, char delim) {
     vector<string> result;
@@ -29,7 +31,7 @@ vector<string> split(const string &str, char delim) {
     return move(result);
 }
 
-string test_case = "";
+string test_case;
 int N; // num of nodes
 vector<double> Xs, Ys;
 void read_input(const string &input_fpath) {
@@ -50,11 +52,13 @@ void read_input(const string &input_fpath) {
 void solve() {
     if(N <= 17) {
         shared_ptr<Solution_DP> dp_solver(new Solution_DP(
-            N, Xs, Ys));
+            N, Xs, Ys, test_case));
         dp_solver->solve();
         dp_solver.reset();
     } else {
-
+        shared_ptr<Stacker> stacker(new Stacker());
+        stacker->solve(N, Xs, Ys, test_case);
+        stacker.reset();
     }
 }
 

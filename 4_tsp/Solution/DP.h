@@ -13,6 +13,7 @@ private:
     typedef unsigned long long ull;
 
     // Input params
+    string _test_case;
     int _N;
     const vector<double> &_X, &_Y;
 
@@ -20,12 +21,28 @@ private:
     vector<Node> _list_nodes;
 
 private:
+    void __write_best(int best_cycle_len, const vector<int> &best_path) {
+        ofstream f_out;
+        f_out.open("submission/out_" + _test_case);
+        f_out << fixed << setprecision(6);
+
+        f_out << best_cycle_len << " 1" << endl;
+        for(int v=0; v<_N; ++v) {
+            f_out << best_path[v];
+            (v == _N-1) ? f_out << endl: f_out << ' ';
+        }
+        f_out.close();
+    }
+
     double __f_distance(const Node &a, const Node &b) {
         return sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) );
     }
 public:
-    Solution_DP(int N, const vector<double> &Xs,const vector<double> &Ys): \
-        _N(N), _X(Xs), _Y(Ys) { assert(_X.size() == _Y.size()); }
+    Solution_DP(
+            int N,
+            const vector<double> &Xs,const vector<double> &Ys,
+            const string test_case): \
+        _N(N), _X(Xs), _Y(Ys), _test_case(test_case) { assert(_X.size() == _Y.size()); }
     void solve() {
         // Build list nodes
         _list_nodes.assign(_N, Node());
@@ -88,9 +105,9 @@ public:
         // Reconstruct
         int cur_city = last_city;
         int subset = (1 << _N) - 1;
-        stack<int> path;
+        vector<int> path;
         while(cur_city != -1) {
-            path.push(cur_city);
+            path.push_back(cur_city);
             int pre_city = pre[cur_city][subset];
 
             subset = subset & ~(1 << cur_city);
@@ -98,10 +115,6 @@ public:
         }
 
         // Print ans
-        cout << min_len_tsp << " 1" << endl;
-        while(!path.empty()) {
-            cout << path.top(); path.pop();
-            path.size() == 0 ? cout << endl: cout << ' ';
-        }
+        __write_best(min_len_tsp, path);
     }
 };

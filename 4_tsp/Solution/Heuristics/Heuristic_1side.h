@@ -1,15 +1,4 @@
 #pragma once
-#include <bits/stdc++.h>
-using namespace std;
-
-int rand_int(int a, int b) {
-    // Random in range [a, b)
-    random_device r;
-    default_random_engine e1(r());
-    uniform_int_distribution<int> uniform_dist(a, b-1);
-    return uniform_dist(e1);
-}
-
 /*
 Greedy
     Start with a node v
@@ -27,7 +16,7 @@ private:
 
         Node(): idx(-1), x(-1.0), y(-1.0), distance(-1.0) {}
         Node(double x, double y): idx(-1), x(x), y(y), distance(-1.0) {}
-        Node(int idx, double x, double y): idx(-1), x(x), y(y), distance(-1.0) {}
+        Node(int idx, double x, double y): idx(idx), x(x), y(y), distance(-1.0) {}
     };
 
     // Input params
@@ -41,6 +30,7 @@ private:
     void __write_best(int best_cycle_len, const vector<int> &best_path) {
         ofstream f_out;
         f_out.open("submission/out_" + _test_case);
+        f_out << fixed << setprecision(6);
 
         f_out << best_cycle_len << " 0" << endl;
         for(int v=0; v<_N; ++v) {
@@ -81,12 +71,12 @@ public:
     Heuristic_1side(
             int N,
             const vector<double> &Xs,const vector<double> &Ys,
-            int n_trials, const string &test_case): \
-        _N(N), \
-        _X(Xs), _Y(Ys), \
-        _n_trials(n_trials), _test_case(test_case) \
+            int n_trials, const string &test_case):
+        _N(N),
+        _X(Xs), _Y(Ys),
+        _n_trials(n_trials), _test_case(test_case)
         { assert(_X.size() == _Y.size()); }
-    void solve() {
+    pair<double, vector<int>> solve() {
         // Reseed
         srand(time(0) + rand_int(0, 1e9));
 
@@ -163,6 +153,7 @@ public:
 
         // do heuristic search
         double best_cycle_len = DBL_MAX;
+        vector<int> best_path;
         for(const int &v: starting_Vs) {
             vector<Node> A_tmp(_A);
 
@@ -172,8 +163,11 @@ public:
             // Relax best ans
             if(best_cycle_len > heu_cycle_len) {
                 best_cycle_len = heu_cycle_len;
-                __write_best(best_cycle_len, heu_path);
+                best_path = heu_path;
+                __write_best(best_cycle_len, best_path);
             }
         }
+
+        return {best_cycle_len, best_path};
     }
 };

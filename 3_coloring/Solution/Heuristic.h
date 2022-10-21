@@ -2,7 +2,6 @@
 /*
 Approx Solution: Heuristic search
 */
-
 int rand_int(int a, int b) {
     random_device r;
     default_random_engine e1(r());
@@ -35,7 +34,9 @@ private:
         f_out.close();
     }
 
-    pair<int, vector<int>> __heuristic_search(vector<Node> &A) {
+    pair<int, vector<int>> __heuristic_search(const vector<Node> &A_) {
+        vector<Node> A(A_);
+
         int heu_max_color = 0;
         vector<int> color(_V, -1);
 
@@ -92,12 +93,17 @@ public:
 
         // Heuristic painting, try multiple times
         int best_max_color = _V;
+        ::omp_set_num_threads(12);
+
+        #pragma omp parallel for
         for(int trial=0; trial<_num_trials; ++trial) {
             auto [heu_max_color, heu_color] = __heuristic_search(A);
-
-            if(best_max_color > heu_max_color) {
-                best_max_color = heu_max_color;
-                __write_best(best_max_color, heu_color);
+            #pragma omp critical
+            {
+                if(best_max_color > heu_max_color) {
+                    best_max_color = heu_max_color;
+                    __write_best(best_max_color, heu_color);
+                }
             }
         }
     }

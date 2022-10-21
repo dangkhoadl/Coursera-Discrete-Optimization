@@ -1,9 +1,6 @@
 #pragma once
 /*
 */
-#include <bits/stdc++.h>
-using namespace std;
-
 class Simulated_Annealing {
 private:
 struct Node {
@@ -22,6 +19,7 @@ private:
     void __write_best(int best_cycle_len, const vector<int> &best_path) {
         ofstream f_out;
         f_out.open("submission/out_" + _test_case);
+        f_out << fixed << setprecision(6);
 
         f_out << best_cycle_len << " 0" << endl;
         for(int v=0; v<_N; ++v) {
@@ -30,7 +28,6 @@ private:
         }
         f_out.close();
     }
-
 
     double __f_distance(const Node &a, const Node &b) {
         return sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) );
@@ -64,9 +61,9 @@ private:
 public:
     Simulated_Annealing(int N,
             const vector<double> &Xs,const vector<double> &Ys,
-            int n_trials, const string &test_case): \
+            int n_trials, const string &test_case):
         _N(N), _X(Xs), _Y(Ys), _n_trials(n_trials), _test_case(test_case) { assert(_X.size() == _Y.size()); }
-    void solve(int n_trials_1, int n_trials_2) {
+    pair<double, vector<int>> solve(double init_cycle_len, const vector<int> &init_path) {
         // Reseed
         srand(time(0) + rand_int(0, 1e9));
 
@@ -76,8 +73,9 @@ public:
             _A[v] = {_X[v], _Y[v]};
         }
 
-        /// Check Init Sol
-
+        // Check Init Sol
+        double best_cycle_len = init_cycle_len;
+        vector<int> best_path(init_path);
 
         // Simulated Annealing
         double T = 1.0*_N*_N;
@@ -120,7 +118,10 @@ public:
             if(cur_cycle_len < best_cycle_len) {
                 best_cycle_len = cur_cycle_len;
                 best_path = cur_path;
+                __write_best(best_cycle_len, best_path);
             }
         }
+
+        return {best_cycle_len, best_path};
     }
 };

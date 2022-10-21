@@ -5,9 +5,6 @@ init_solution = Solve 2 heuristic optimizer, pick the best
     Pick 2 edges, swap edge
     if new_cycle_len < cur_cycle_len: update new sol
 */
-#include <bits/stdc++.h>
-using namespace std;
-
 class Hill_Climbing {
 private:
 struct Node {
@@ -26,6 +23,7 @@ private:
     void __write_best(int best_cycle_len, const vector<int> &best_path) {
         ofstream f_out;
         f_out.open("submission/out_" + _test_case);
+        f_out << fixed << setprecision(6);
 
         f_out << best_cycle_len << " 0" << endl;
         for(int v=0; v<_N; ++v) {
@@ -60,9 +58,9 @@ public:
     Hill_Climbing(
             int N,
             const vector<double> &Xs,const vector<double> &Ys,
-            int n_trials, const string &test_case): \
+            int n_trials, const string &test_case):
         _N(N), _X(Xs), _Y(Ys), _n_trials(n_trials), _test_case(test_case) { assert(_X.size() == _Y.size()); }
-    void solve() {
+    pair<double, vector<int>> solve(double init_cycle_len, const vector<int> &init_path) {
         // Reseed
         srand(time(0) + rand_int(0, 1e9));
 
@@ -72,8 +70,9 @@ public:
             _A[v] = {_X[v], _Y[v]};
         }
 
-        /// Check Init Sol
-       
+        // Check Init Sol
+        double best_cycle_len = init_cycle_len;
+        vector<int> best_path(init_path);
 
         // 2-Opt Local search
         while(_n_trials--) {
@@ -131,5 +130,7 @@ public:
             best_path = __swap_edge(src_1, src_2, best_path);
             __write_best(best_cycle_len, best_path);
         }
+
+        return {best_cycle_len, best_path};
     }
 };

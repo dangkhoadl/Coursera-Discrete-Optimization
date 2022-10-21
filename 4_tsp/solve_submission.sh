@@ -7,7 +7,7 @@ set -o pipefail  # Exit if any of the commands in the pipeline will
 # Config
 export OUTPUT_DIR="assets"
 OUTPUT_TXT="${OUTPUT_DIR}/results_submission.txt"
-MAX_PROCESS=6
+MAX_PROCESS=1
 
 ####### Functions #######
 function solve_a_testcase {
