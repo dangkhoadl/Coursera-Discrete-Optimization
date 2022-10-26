@@ -13,8 +13,8 @@ MAX_PROCESS=3
 function solve_a_testcase {
     testcase_fpath=$1
 
-    # Run for 1 day
-    timeout 24h python Solution/main.py ${testcase_fpath}
+    # Run for 2 day
+    timeout 48h python Solution/main.py ${testcase_fpath}
     #
 }
 export -f solve_a_testcase;

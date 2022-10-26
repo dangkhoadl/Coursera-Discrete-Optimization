@@ -26,13 +26,13 @@ public:
             10, test_case));
         auto [sa_cost, sa_path] = sa->solve(heu_1_cost, heu_1_path);
         sa.reset();
-        cerr << test_case << " : Simulated Annealing 1: " << sa_cost << endl;
+        cerr << test_case << " : Simulated Annealing 1 : " << sa_cost << endl;
 
         shared_ptr<Hill_Climbing> hill(new Hill_Climbing(
             N, Xs, Ys,
             10, test_case));
         auto [hill_cost, hill_path] = hill->solve(sa_cost, sa_path);
         hill.reset();
-        cerr << test_case << " : Hill Climbing 1: " << hill_cost << endl;
+        cerr << test_case << " : Hill Climbing 1 : " << hill_cost << endl;
     }
 };

@@ -125,7 +125,7 @@ class MIP_PetalClustering(object):
         solver = COIN_CMD()
         status = model.solve(COIN_CMD(
             strong=True, cuts=True,
-            msg=0, timeLimit=30*60, threads=8, presolve=True))
+            msg=0, timeLimit=10*60, threads=8, presolve=True))
 
         if model.status != 1:
             return -1, []
@@ -185,18 +185,18 @@ class MIP_PetalClustering(object):
         # Create grid search for each petal
         #       Prior: petal size dec, num_vehicle dec
         from itertools import product
-        MAX_PETAL_SIZE_GRID = min(51, self._N - 1)
+        MAX_PETAL_SIZE_GRID = min(71, self._N - 1)
         MAX_VEHICLE_SIZE_GRID = min(5, self._V)
 
         params = [(max_petal_size, max_vehicle_size) for max_petal_size, max_vehicle_size in \
-            product(range(MAX_PETAL_SIZE_GRID, MAX_PETAL_SIZE_GRID+1, 5), range(2, MAX_VEHICLE_SIZE_GRID+1))]
+            product(range(MAX_PETAL_SIZE_GRID-40, MAX_PETAL_SIZE_GRID+1, 10), range(3, MAX_VEHICLE_SIZE_GRID+1))]
         params.sort(key=lambda p: p[1], reverse=True)
         params.sort(key=lambda p: p[0], reverse=True)
 
         best_cost = float("inf")
         for MAX_PETAL_SIZE, MAX_VEHICLE_SIZE in params:
             st_, en_ = 0, MAX_PETAL_SIZE
-            num_vehicles = 1
+            num_vehicles = 2
             total_cost, routes = 0., []
             accept = True
             vehicle_used = 0
@@ -212,14 +212,19 @@ class MIP_PetalClustering(object):
                     warehouse=self._warehouse, customers=customers)
 
                 if petal_cost_ == -1:
+                    # If failed increase num_vehicles then decrease petal size
                     logger.info(f"{self._test_case} : petal = [{st_}, {en_}) : num vehicles = {V} : vehicles used = {vehicle_used}/{self._V} : failed")
 
-                    # If failed increae num_vehicles then decrease petal size
                     if num_vehicles == MAX_VEHICLE_SIZE:
                         en_ -= 1
-                        num_vehicles = 1
+                        num_vehicles = 2
                     else:
                         num_vehicles = min(num_vehicles + 1, MAX_VEHICLE_SIZE)
+
+                    # Early stopping check
+                    if vehicle_used + num_vehicles > self._V:
+                        accept = False
+                        break
                 else:
                     # If succeed, move to next petal
                     total_cost += petal_cost_
@@ -232,8 +237,7 @@ class MIP_PetalClustering(object):
 
                     st_ = en_
                     en_ = min(st_ + MAX_PETAL_SIZE, self._N-1)
-                    num_vehicles = 1
-
+                    num_vehicles = min(2, self._V - vehicle_used)
 
                     # Early stopping check
                     if vehicle_used >= self._V and st_ < (self._N - 1):

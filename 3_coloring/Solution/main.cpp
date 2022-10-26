@@ -5,8 +5,16 @@
 using namespace std;
 
 #define int long long
+int rand_int(int a, int b) {
+    // Random in range [a, b)
+    random_device r;
+    default_random_engine e1(r());
+    uniform_int_distribution<int> uniform_dist(a, b-1);
+    return uniform_dist(e1);
+}
+
 #include "Backtrack.h"
-#include "Heuristic.h"
+#include "Tabu.h"
 
 vector<string> split(const string &str, char delim) {
     vector<string> result;
@@ -40,15 +48,15 @@ void read_input(const string &input_fpath) {
 void solve() {
     // Exact solution
     if(E <= 600) {
-        shared_ptr<Solution_Backtrack> bt_solver(new Solution_Backtrack(
+        shared_ptr<Backtrack> bt_solver(new Backtrack(
             N, E, edges, test_case));
         bt_solver->solve();
         bt_solver.reset();
     } else {
-        shared_ptr<Solution_Heuristic> heu_solver(new Solution_Heuristic(
-            N, E, edges, 5e8, test_case));
-        heu_solver->solve();
-        heu_solver.reset();
+        shared_ptr<Tabu> tabu_solver(new Tabu(
+            N, E, edges, 1e8, test_case));
+        tabu_solver->solve();
+        tabu_solver.reset();
     }
 }
 

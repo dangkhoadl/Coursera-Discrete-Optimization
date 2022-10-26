@@ -13,8 +13,8 @@ MAX_PROCESS=1
 function solve_a_testcase {
     testcase_fpath=$1
 
-    # Run for 30 min
-    timeout 60m ./main.exe ${testcase_fpath}
+    # Run for 120 min
+    timeout 120m ./main.exe ${testcase_fpath}
     #
 }
 export -f solve_a_testcase;

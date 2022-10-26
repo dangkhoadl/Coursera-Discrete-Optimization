@@ -6,7 +6,7 @@
 
 #### 3_coloring
 - Smallset: Binary search + Backtracking
-- Bigset: Heuristic
+- Bigset: Heuristic + Tabu List
 
 #### 4_tsp
 - Smallset: Bitmask Dynamic Programming

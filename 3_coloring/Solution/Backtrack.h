@@ -3,7 +3,7 @@
 /*
 Exact Solution: Binary search + Backtrack+Constraints+GreedyPick
 */
-class Solution_Backtrack {
+class Backtrack {
 private:
     struct Node {
         int idx;
@@ -74,7 +74,7 @@ private:
         return false;
     }
 public:
-    Solution_Backtrack(int V, int E, const vector<vector<int>> &edges, const string &test_case): \
+    Backtrack(int V, int E, const vector<vector<int>> &edges, const string &test_case): \
         _V(V), _E(E), _edges(edges), _test_case(test_case) {}
 
     void solve() {
