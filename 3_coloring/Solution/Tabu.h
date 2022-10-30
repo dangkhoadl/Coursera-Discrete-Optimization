@@ -99,20 +99,20 @@ public:
             auto [cand_max_color, cand_colors, cand_config] = candidates[0];
 
             // params
-            int search_iters = (int)1e5;
+            int search_iters = (int)1e6;
             vector<int> new_config;
             int i=0, j=0;
 
             volatile bool flag = false;
 
             #pragma omp parallel for \
-                num_threads(4) \
+                num_threads(8) \
                 private(i, j, new_config) \
                 shared(candidates, check_duplicated_config)
             for(int iter=0; iter<search_iters; ++iter) {
                 // Shuffle [i,j) segment
                 j = rand_int(1, _V);
-                i = rand_int(max((int)0, (int)(j-50)), j);
+                i = rand_int(0, j);
                 new_config = cand_config;
                 shuffle(new_config.begin()+i, new_config.begin()+j, default_random_engine(seed));
 
@@ -132,11 +132,11 @@ public:
             // Early stopping
             if(candidates.size() == 0) break;
 
-            // Greedy keep the best 5 candidates
+            // Greedy keep the best 20 candidates
             sort(candidates.begin(), candidates.end(),
                 [] (const tuple<int, vector<int>, vector<int>> &a, const tuple<int, vector<int>, vector<int>> &b) \
                     {return get<0>(a) < get<0>(b);});
-            candidates = slice_<tuple<int, vector<int>, vector<int>>>(candidates, 0, 5);
+            candidates = slice_<tuple<int, vector<int>, vector<int>>>(candidates, 0, 20);
             // check_duplicated_config.clear();
             // for(auto cand:candidates) check_duplicated_config.insert(get<2>(cand));
 
